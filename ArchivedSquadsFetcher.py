@@ -8,9 +8,9 @@ import openpyxl.utils.dataframe as __odf
 from openpyxl import load_workbook
 import openpyxl.styles as __oxl_styles
 
-_url = __urlreq.urlopen("http://www.espncricinfo.com/series/8039/game/1144483/england-vs-south-africa-1st-match-icc-cricket-world-cup-2019")
-_squads = ['England', 'South Africa']
-_excel_file = "C:/Users/ASUS/Desktop/Next Match Squads.xlsx"
+_url = __urlreq.urlopen("http://www.espncricinfo.com/series/8039/game/1144488/england-vs-pakistan-6th-match-icc-cricket-world-cup-2019")
+_squads = ['England', 'Pakistan']
+_excel_file = "E:/D11/Next Match Squads.xlsx"
 _new_wb = True
 
 _parser = 'html.parser'

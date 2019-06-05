@@ -1,0 +1,50 @@
+
+
+
+#before submit query
+'''http://stats.espncricinfo.com/ci/engine/player/44828.html?class=2;filter=advanced;type=allround'''
+
+#after submit query
+'''http://stats.espncricinfo.com/ci/engine/player/44828.html?class=2;filter=advanced;orderby=default;template=results;type=allround'''
+
+# last 2 years
+'''http://stats.espncricinfo.com/ci/engine/player/
+44828
+.html?class=2;filter=advanced;
+orderby=default;
+spanmax1=29+May+2019;spanmin1=29+May+2017;spanval1=span;
+template=results;
+type=allround'''
+
+
+import urllib.request as urlreq__
+import pandas as pd__
+from bs4 import BeautifulSoup as bsoup__
+
+url_0_ = 'http://stats.espncricinfo.com/ci/engine/player/'
+player_id_ = '44828'
+TESTs_ = '1'
+ODIs_ = '2'
+T20Is_ = '3'
+url_match_type_ = '.html?class='+ODIs_+';filter=advanced;'
+order_by_ = 'orderby='
+order_by_option_list_ = ['default;']
+order_by_result_1_ = order_by_option_list_[0]
+date_ = '29' #todo date parsing required
+month_ = 'May'
+current_year_ = '2019'
+target_year_ = '2017'
+last_2_yrs_ = 'spanmax1='+date_+'+'+month_+'+'+current_year_+';spanmin1='+date_+'+'+month_+'+'+target_year_+';spanval1=span;'
+template_results_ = 'template=results;'
+type_ = 'type='
+type_option_list_ = ['allround']
+type_result_1_ = type_option_list_[0]
+
+url_overall = ''
+url_last_2_yrs = url_0_ + player_id_ + url_match_type_ + order_by_ + order_by_result_1_ + last_2_yrs_ + template_results_ + type_ + type_result_1_
+print(url_last_2_yrs)
+
+url_resp_ = urlreq__.urlopen(url_last_2_yrs)
+df_ = pd__.read_html(url_resp_)[1]
+print(pd__.read_html(url_resp_))
+
