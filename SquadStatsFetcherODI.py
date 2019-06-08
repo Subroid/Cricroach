@@ -12,7 +12,7 @@ from pandas import DataFrame as DF
 from openpyxl.worksheet.worksheet import Worksheet as WS
 
 
-url_of_match_ = 'http://www.espncricinfo.com/series/8039/game/1144488/england-vs-pakistan-6th-match-icc-cricket-world-cup-2019'
+url_of_match_ = 'http://www.espncricinfo.com/series/8039/game/1144494/england-vs-bangladesh-12th-match-icc-cricket-world-cup-2019'
 url_main_domain_ = 'http://www.espncricinfo.com/'
 url_resp_ = url_req__.urlopen(url_of_match_)
 PARSER_ = 'html.parser'
@@ -322,7 +322,10 @@ for i in range(len(team_2_tr_tags_)):
     df_list_stats_ = pd__.read_html(url_player_stats_)
     df_stats_1_ = df_list_stats_[2]
     df_stats_2_ = df_list_stats_[3]
-    df_stats_2_ = df_stats_2_.set_index('Grouping')
+    try:
+        df_stats_2_ = df_stats_2_.set_index('Grouping')
+    except KeyError:
+        pass
     # todo finding batting position and appending to the player_name
     # todo matches batting/fielding first data inseriting to stats_1
     # todo 0-19, lasts, overall/bat-1st-2nd data retrieving and inseritng to stats_1 or excel
