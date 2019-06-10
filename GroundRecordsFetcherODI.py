@@ -7,7 +7,7 @@ import openpyxl.utils.dataframe as odf__
 from openpyxl import load_workbook
 
 
-url_of_match_ = 'http://www.espncricinfo.com/series/8039/game/1144492/australia-vs-west-indies-10th-match-icc-cricket-world-cup-2019'
+url_of_match_ = 'http://www.espncricinfo.com/series/8039/game/1144496/australia-vs-india-14th-match-icc-cricket-world-cup-2019'
 url_main_domain_ = 'http://www.espncricinfo.com/'
 url_resp_ = url_req__.urlopen(url_of_match_)
 PARSER_ = 'html.parser'
