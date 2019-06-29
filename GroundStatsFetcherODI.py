@@ -12,12 +12,12 @@ from openpyxl.worksheet.worksheet import Worksheet as WS
 #^TODO deletable
 
 
-url_of_match_ = 'http://www.espncricinfo.com/series/8039/game/1144496/australia-vs-india-14th-match-icc-cricket-world-cup-2019'
+url_of_match_ = 'http://www.espncricinfo.com/series/8039/game/1144498/bangladesh-vs-sri-lanka-16th-match-icc-cricket-world-cup-2019'
 url_main_domain_ = 'http://www.espncricinfo.com/'
 url_resp_ = url_req__.urlopen(url_of_match_)
 PARSER_ = 'html.parser'
 
-EXCEL_FILE_LOC_ = 'E:/D11/D11/'
+EXCEL_FILE_LOC_ = 'E:/D11/'
 CURRNET_DATE_ = '08+Jun+2019'
 TARGET_DATE_ = '02+Jun+2017'
 

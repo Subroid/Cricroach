@@ -14,10 +14,11 @@ class StatsFetcher:
     import re as Re
     import openpyxl.styles as Ostyles
 
-
-    #todo position based(equal to 3) http://stats.espncricinfo.com/ci/engine/player/253802.html?batting_positionmax1=3;batting_positionmin1=3;batting_positionval1=batting_position;class=2;filter=advanced;orderby=default;template=results;type=batting
+    #todo ??partnershiping
+    #todo top order based(equal to 3) http://stats.espncricinfo.com/ci/engine/player/253802.html?batting_positionmax1=3;batting_positionmin1=3;batting_positionval1=batting_position;class=2;filter=advanced;orderby=default;template=results;type=batting
     #todo batting/bowling style
-
+    # todo opener position dismissal summary http://stats.espncricinfo.com/ci/engine/player/34102.html?batting_positionmax1=2;batting_positionval1=batting_position;class=2;filter=advanced;orderby=start;orderbyad=reverse;template=results;type=batting;view=dismissal_summary
+    # todo middle order http://stats.espncricinfo.com/ci/engine/player/28081.html?batting_positionmax1=7;batting_positionmin1=4;batting_positionval1=batting_position;class=2;filter=advanced;orderby=default;template=results;type=batting
     def __init__(self):
         self
 
@@ -41,16 +42,16 @@ class StatsFetcher:
         team_2_tbody_tag_ = team_2_table_tag_.tbody
         team_2_tr_tags_ = team_2_tbody_tag_.find_all('tr')
 
-        # TEAM 1 BATTING
-        # wb_ = self.Wb()
-        # excel_file_team_1_batsmen_ = folder_loc + team_1_name_ + ' Batting career summary.xlsx'
-        # self.__excelize_all_batsmen_batting_analysis_(team_1_tr_tags_, wb_)
-        # sheet_ = wb_['Sheet']
-        # wb_.remove(sheet_)
-        # wb_.save(excel_file_team_1_batsmen_)
-        # wb_.close()
+       # TEAM 1 BATTING
+        wb_ = self.Wb()
+        excel_file_team_1_batsmen_ = folder_loc + team_1_name_ + ' Batting career summary.xlsx'
+        self.__excelize_all_batsmen_batting_analysis_(team_1_tr_tags_, wb_)
+        sheet_ = wb_['Sheet']
+        wb_.remove(sheet_)
+        wb_.save(excel_file_team_1_batsmen_)
+        wb_.close()
 
-        # TEAM 1 BOWLING
+        # TEAM 2 BATTING
         # wb_ = self.Wb()
         # excel_file_team_2_batsmen_ = folder_loc + team_2_name_ + ' Batting career summary.xlsx'
         # self.__excelize_all_batsmen_batting_analysis_(team_2_tr_tags_, wb_)
@@ -58,8 +59,8 @@ class StatsFetcher:
         # wb_.remove(sheet_)
         # wb_.save(excel_file_team_2_batsmen_)
         # wb_.close()
-
-        # TEAM 2 BATTING
+        #
+        # # TEAM 1 BOWLING
         # wb_ = self.Wb()
         # excel_file_team_1_bowlers_ = folder_loc + team_1_name_ + ' Bowling career summary.xlsx'
         # self.__excelize_all_bowlers_bowling_analysis_(team_1_tr_tags_, wb_)
@@ -67,15 +68,15 @@ class StatsFetcher:
         # wb_.remove(sheet_)
         # wb_.save(excel_file_team_1_bowlers_)
         # wb_.close()
-
-        # TEAM 2 BOWLING
-        wb_ = self.Wb()
-        excel_file_team_2_bowlers_ = folder_loc + team_2_name_ + ' Bowling career summary.xlsx'
-        self.__excelize_all_bowlers_bowling_analysis_(team_2_tr_tags_, wb_)
-        sheet_ = wb_['Sheet']
-        wb_.remove(sheet_)
-        wb_.save(excel_file_team_2_bowlers_)
-        wb_.close()
+        #
+        # # TEAM 2 BOWLING
+        # wb_ = self.Wb()
+        # excel_file_team_2_bowlers_ = folder_loc + team_2_name_ + ' Bowling career summary.xlsx'
+        # self.__excelize_all_bowlers_bowling_analysis_(team_2_tr_tags_, wb_)
+        # sheet_ = wb_['Sheet']
+        # wb_.remove(sheet_)
+        # wb_.save(excel_file_team_2_bowlers_)
+        # wb_.close()
 
 
     def __read_html(self, url):
@@ -84,8 +85,9 @@ class StatsFetcher:
 
     def __excelize_all_batsmen_batting_analysis_(self, team_tr_tags, wb):
 
-        for i in range(len(team_tr_tags)):
-            player_tr_tag_ = team_tr_tags[i]
+        # for i in range(len(team_tr_tags)):
+        for i in range(1):
+            player_tr_tag_ = team_tr_tags[0]
             player_a_tag_ = player_tr_tag_.a
             player_profile_link_ = player_a_tag_['href']
             player_id_ = self.Re.findall('\d+', player_profile_link_)[0]
@@ -99,7 +101,10 @@ class StatsFetcher:
             URL_BATSMAN_CAREER_OVERALL_STATS_ = \
                 'http://stats.espncricinfo.com/ci/engine/player/'+player_id_+'.html?class=2;template=results;type=batting'
 
-            df_list_batting_career_summary_stats_ = self.__fetch_career_summaries(URL_BATSMAN_CAREER_OVERALL_STATS_)
+            try:
+                df_list_batting_career_summary_stats_ = self.__fetch_career_summaries(URL_BATSMAN_CAREER_OVERALL_STATS_)
+            except KeyError:
+                continue
             df_batting_career_overview_stats_ = df_list_batting_career_summary_stats_[0]
             df_batting_career_summary_stats_ = df_list_batting_career_summary_stats_[1]
             df_batting_career_overview_stats_ = self.__numerize_df_stats_upto_(df_batting_career_overview_stats_, 13)
@@ -108,7 +113,10 @@ class StatsFetcher:
             self.__excelize_batsman_df_stats_(df_list_batting_career_summary_stats_, wb, player_name_, player_role_, player_id_)
 
     def __fetch_career_summaries(self, url):
-        df_career_overview_stats_ = self.__fetch_career_overview(url)
+        try:
+            df_career_overview_stats_ = self.__fetch_career_overview(url)
+        except KeyError as e:
+            return e
         df_career_summary_stats_ = self.__fetch_career_summary(url)
         df_merged_career_overview_stats_ = \
             self.__merge_career_overview_(df_career_overview_stats_, df_career_summary_stats_)
@@ -123,7 +131,10 @@ class StatsFetcher:
     def __fetch_career_overview(self, url):
         df_list_ = self.__read_html(url)
         df_stats_ = self.DFrame(df_list_[2])
-        df_stats_ = df_stats_.set_index('Unnamed: 0')
+        try:
+         df_stats_ = df_stats_.set_index('Unnamed: 0')
+        except KeyError as e:
+            return e
         return df_stats_
 
     def __fetch_career_summary(self, url):
@@ -183,6 +194,15 @@ class StatsFetcher:
 
     def __excelize_batsman_df_stats_(self, df_list_stats_, wb_, player_name, player_role, player_id):
 
+        URL_BATSMAN_OPENER_OVERALL_STATS = \
+            'http://stats.espncricinfo.com/ci/engine/player/'+player_id+'.html?batting_positionmax1=2;batting_positionval1=batting_position;class=2;filter=advanced;orderby=default;template=results;type=batting'
+
+        URL_BATSMAN_OPENER_DISMISSALS_OVERALL_STATS = \
+            'http://stats.espncricinfo.com/ci/engine/player/'+player_id+'.html?batting_positionmax1=2;batting_positionval1=batting_position;class=2;filter=advanced;orderby=default;template=results;type=batting;view=dismissal_summary'
+        URL_BATSMAN_OPENER_DISMISSALS_OVERALL_STATS = \
+            'http://stats.espncricinfo.com/ci/engine/player/'+player_id+'.html?batting_fielding_first=1;batting_positionmax1=2;batting_positionval1=batting_position;class=2;filter=advanced;orderby=default;template=results;type=batting;view=dismissal_summary'
+
+
         URL_BATSMAN_DISMISSALS_OVERALL_STATS_ = \
             'http://stats.espncricinfo.com/ci/engine/player/'+player_id+'.html?class=2;template=results;type=batting;view=dismissal_summary'
         URL_BATSMAN_DISMISSALS_BAT_1ST_STATS_ = \
@@ -226,7 +246,10 @@ class StatsFetcher:
         ws_.append([""])
         self.__excel_ready_df_stats_(df_stats_2_, ws_)
 
-        ws_.cell(row=1, column=ws_.max_column + 2).value = '0-19'
+        ws_.cell(row=1, column=ws_.max_column + 2).value = '50+'
+        ws_.cell(row=1, column=ws_.max_column + 1).value = 'BF avg'
+        ws_.cell(row=1, column=ws_.max_column + 1).value = '50+ avg'
+        ws_.cell(row=1, column=ws_.max_column + 1).value = '0-19'
         ws_.cell(row=1, column=ws_.max_column + 1).value = 'Last 100'
         ws_.cell(row=1, column=ws_.max_column + 1).value = 'Last 2nd 100'
         ws_.cell(row=1, column=ws_.max_column + 1).value = 'Last 50'
@@ -253,34 +276,51 @@ class StatsFetcher:
             if(j > 11):
                 break
             if(j == 3 or j == 4 or j == 5 or j == 10):
+                # Last 5 avg due
                 ws_.cell(row=j, column=ws_.max_column).value = \
-                    '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-7).column_letter + str(j) + '-' + ws_.cell(row=j, column=ws_.max_column-28).column_letter + str(j) + ',"--")'
+                    '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-7).column_letter + str(j) + '-' + ws_.cell(row=j, column=ws_.max_column-31).column_letter + str(j) + ',"--")'
+                # 0-19 due
                 ws_.cell(row=j, column=ws_.max_column-1).value = \
                      '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-8).column_letter + str(j) + '-' + ws_.cell(row=j, column=ws_.max_column-14).column_letter + str(j) + ',"--")'
+                # 50 due
                 ws_.cell(row=j, column=ws_.max_column-2).value = \
                     '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-9).column_letter + str(j) + '-' + ws_.cell(row=j, column=ws_.max_column-16).column_letter + str(j) + ',"--")'
+                # 100 due
                 ws_.cell(row=j, column=ws_.max_column-3).value = \
                       '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-10).column_letter + str(j) + '-' + ws_.cell(row=j, column=ws_.max_column-18).column_letter + str(j) + ',"--")'
+                # 0-19 due 2
                 ws_.cell(row=j, column=ws_.max_column-4).value = \
                     '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-8).column_letter + str(j) + '-' + ws_.cell(row=j, column=ws_.max_column-13).column_letter + str(j) + ',"--")'
+                # 50 due 2
                 ws_.cell(row=j, column=ws_.max_column-5).value = \
                      '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-9).column_letter + str(j) + '-' + ws_.cell(row=j, column=ws_.max_column-15).column_letter + str(j) + ',"--")'
+                # 100 due 2
                 ws_.cell(row=j, column=ws_.max_column-6).value = \
                     '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-10).column_letter + str(j) + '-' + ws_.cell(row=j, column=ws_.max_column-17).column_letter + str(j) + ',"--")'
-                ws_.cell(row=j, column=ws_.max_column-8).value = \
-                    '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-32).column_letter + str(j) + '/' + ws_.cell(row=j, column=ws_.max_column-19).column_letter + str(j) + ',"--")'
+                # 0-19 avg
                 ws_.cell(row=j, column=ws_.max_column-9).value = \
-                     '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-32).column_letter + str(j) + '/' + ws_.cell(row=j, column=ws_.max_column-24).column_letter + str(j) + ',"--")'
+                     '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-35).column_letter + str(j) + '/' + ws_.cell(row=j, column=ws_.max_column-19).column_letter + str(j) + ',"--")'
+                # 50s avg
                 ws_.cell(row=j, column=ws_.max_column-10).value = \
-                    '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-32).column_letter + str(j) + '/' + ws_.cell(row=j, column=ws_.max_column-25).column_letter + str(j) + ',"--")'
+                    '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-35).column_letter + str(j) + '/' + ws_.cell(row=j, column=ws_.max_column-27).column_letter + str(j) + ',"--")'
+                # 100s avg
                 ws_.cell(row=j, column=ws_.max_column-11).value = \
-                      '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-27).column_letter + str(j) + '/' + ws_.cell(row=j, column=ws_.max_column-21).column_letter + str(j) + ',"--")'
+                      '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-35).column_letter + str(j) + '/' + ws_.cell(row=j, column=ws_.max_column-28).column_letter + str(j) + ',"--")'
+                # 6s avg
                 ws_.cell(row=j, column=ws_.max_column-12).value = \
-                    '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-27).column_letter + str(j) + '/' + ws_.cell(row=j, column=ws_.max_column-22).column_letter + str(j) + ',"--")'
-                # ws_.cell(row=j, column=ws_.max_column-5).value = \
-                #      '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-9).column_letter + str(j) + '-' + ws_.cell(row=j, column=ws_.max_column-15).column_letter + str(j) + ',"--")'
-                # ws_.cell(row=j, column=ws_.max_column-6).value = \
-                #     '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-10).column_letter + str(j) + '-' + ws_.cell(row=j, column=ws_.max_column-17).column_letter + str(j) + ',"--")'
+                    '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-24).column_letter + str(j) + '/' + ws_.cell(row=j, column=ws_.max_column-35).column_letter + str(j) + ',"--")'
+                # 4s avg
+                ws_.cell(row=j, column=ws_.max_column-12).value = \
+                    '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-25).column_letter + str(j) + '/' + ws_.cell(row=j, column=ws_.max_column-35).column_letter + str(j) + ',"--")'
+                # 50+ avg
+                ws_.cell(row=j, column=ws_.max_column-20).value = \
+                                    '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-35).column_letter + str(j) + '/' + ws_.cell(row=j, column=ws_.max_column-22).column_letter + str(j) + ',"--")'
+                # BF avg
+                ws_.cell(row=j, column=ws_.max_column-21).value = \
+                                                    '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-30).column_letter + str(j) + '/' + ws_.cell(row=j, column=ws_.max_column-35).column_letter + str(j) + ',"--")'
+                # 50+
+                ws_.cell(row=j, column=ws_.max_column-22).value = \
+                                                    '=IFERROR(' + ws_.cell(row=j, column=ws_.max_column-28).column_letter + str(j) + '+' + ws_.cell(row=j, column=ws_.max_column-27).column_letter + str(j) + ',"--")'
 
                 ws_.cell(row=j, column=ws_.max_column - 1).number_format = '#,##0.00'
                 ws_.cell(row=j, column=ws_.max_column - 2).number_format = '#,##0.00'
@@ -293,77 +333,84 @@ class StatsFetcher:
                 ws_.cell(row=j, column=ws_.max_column - 10).number_format = '#,##0.00'
                 ws_.cell(row=j, column=ws_.max_column - 11).number_format = '#,##0.00'
                 ws_.cell(row=j, column=ws_.max_column - 12).number_format = '#,##0.00'
+                ws_.cell(row=j, column=ws_.max_column - 13).number_format = '#,##0.00'
+                ws_.cell(row=j, column=ws_.max_column - 20).number_format = '#,##0.00'
+                ws_.cell(row=j, column=ws_.max_column - 21).number_format = '#,##0.00'
 
             if(j==3):
-                ws_.cell(row=j, column=ws_.max_column - 7).value = \
+                # Last 5 avg
+                ws_.cell(row=j, column=ws_.max_column - 8).value = \
                     self.__find_batsman_5_matches_avg_(URL_BATSMAN_INNINGS_OVERALL_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-13).value = \
-                    self.__find_batsman_2nd_last_match_(0, 20, URL_BATSMAN_INNINGS_OVERALL_STATS_)
+                    self.__find_batsman_2nd_last_match_(-1, 20, URL_BATSMAN_INNINGS_OVERALL_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-14).value = \
-                    self.__find_batsman_last_match_(0, 20, URL_BATSMAN_INNINGS_OVERALL_STATS_)
+                    self.__find_batsman_last_match_(-1, 20, URL_BATSMAN_INNINGS_OVERALL_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-15).value = \
-                    self.__find_batsman_2nd_last_match_(50, 100, URL_BATSMAN_INNINGS_OVERALL_STATS_)
+                    self.__find_batsman_2nd_last_match_(49, 100, URL_BATSMAN_INNINGS_OVERALL_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-16).value = \
-                    self.__find_batsman_last_match_(50, 100, URL_BATSMAN_INNINGS_OVERALL_STATS_)
+                    self.__find_batsman_last_match_(49, 100, URL_BATSMAN_INNINGS_OVERALL_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-17).value = \
-                    self.__find_batsman_2nd_last_match_(100, 300, URL_BATSMAN_INNINGS_OVERALL_STATS_)
+                    self.__find_batsman_2nd_last_match_(99, 300, URL_BATSMAN_INNINGS_OVERALL_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-18).value = \
-                    self.__find_batsman_last_match_(100, 300, URL_BATSMAN_INNINGS_OVERALL_STATS_)
+                    self.__find_batsman_last_match_(99, 300, URL_BATSMAN_INNINGS_OVERALL_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-19).value = \
                     self.__get_bastman_dismissals_0to19_(URL_BATSMAN_DISMISSALS_OVERALL_STATS_)
 
 
             if(j==4):
-                ws_.cell(row=j, column=ws_.max_column - 7).value = \
-                    self.__find_batsman_5_matches_avg_(URL_BATSMAN_INNINGS_BAT_1ST_STATS_)
+                # Last 5 avg
+                ws_.cell(row=j, column=ws_.max_column - 8).value = \
+                    self.__find_batsman_5_matches_avg_(URL_BATSMAN_INNINGS_OVERALL_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-13).value = \
-                    self.__find_batsman_2nd_last_match_(0, 20, URL_BATSMAN_INNINGS_BAT_1ST_STATS_)
+                    self.__find_batsman_2nd_last_match_(-1, 20, URL_BATSMAN_INNINGS_BAT_1ST_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-14).value = \
-                    self.__find_batsman_last_match_(0, 20, URL_BATSMAN_INNINGS_BAT_1ST_STATS_)
+                    self.__find_batsman_last_match_(-1, 20, URL_BATSMAN_INNINGS_BAT_1ST_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-15).value = \
-                    self.__find_batsman_2nd_last_match_(50, 100, URL_BATSMAN_INNINGS_BAT_1ST_STATS_)
+                    self.__find_batsman_2nd_last_match_(49, 100, URL_BATSMAN_INNINGS_BAT_1ST_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-16).value = \
-                    self.__find_batsman_last_match_(50, 100, URL_BATSMAN_INNINGS_BAT_1ST_STATS_)
+                    self.__find_batsman_last_match_(49, 100, URL_BATSMAN_INNINGS_BAT_1ST_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-17).value = \
-                    self.__find_batsman_2nd_last_match_(100, 300, URL_BATSMAN_INNINGS_BAT_1ST_STATS_)
+                    self.__find_batsman_2nd_last_match_(99, 300, URL_BATSMAN_INNINGS_BAT_1ST_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-18).value = \
-                    self.__find_batsman_last_match_(100, 300, URL_BATSMAN_INNINGS_BAT_1ST_STATS_)
+                    self.__find_batsman_last_match_(99, 300, URL_BATSMAN_INNINGS_BAT_1ST_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-19).value = \
                     self.__get_bastman_dismissals_0to19_(URL_BATSMAN_DISMISSALS_BAT_1ST_STATS_)
 
             if(j==5):
-                ws_.cell(row=j, column=ws_.max_column - 7).value = \
-                    self.__find_batsman_5_matches_avg_(URL_BATSMAN_INNINGS_BAT_2ND_STATS_)
+                # Last 5 avg
+                ws_.cell(row=j, column=ws_.max_column - 8).value = \
+                    self.__find_batsman_5_matches_avg_(URL_BATSMAN_INNINGS_OVERALL_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-13).value = \
-                    self.__find_batsman_2nd_last_match_(0, 20, URL_BATSMAN_INNINGS_BAT_2ND_STATS_)
+                    self.__find_batsman_2nd_last_match_(-1, 20, URL_BATSMAN_INNINGS_BAT_2ND_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-14).value = \
-                    self.__find_batsman_last_match_(0, 20, URL_BATSMAN_INNINGS_BAT_2ND_STATS_)
+                    self.__find_batsman_last_match_(-1, 20, URL_BATSMAN_INNINGS_BAT_2ND_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-15).value = \
-                    self.__find_batsman_2nd_last_match_(50, 100, URL_BATSMAN_INNINGS_BAT_2ND_STATS_)
+                    self.__find_batsman_2nd_last_match_(49, 100, URL_BATSMAN_INNINGS_BAT_2ND_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-16).value = \
-                    self.__find_batsman_last_match_(50, 100, URL_BATSMAN_INNINGS_BAT_2ND_STATS_)
+                    self.__find_batsman_last_match_(49, 100, URL_BATSMAN_INNINGS_BAT_2ND_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-17).value = \
-                    self.__find_batsman_2nd_last_match_(100, 300, URL_BATSMAN_INNINGS_BAT_2ND_STATS_)
+                    self.__find_batsman_2nd_last_match_(99, 300, URL_BATSMAN_INNINGS_BAT_2ND_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-18).value = \
-                    self.__find_batsman_last_match_(100, 300, URL_BATSMAN_INNINGS_BAT_2ND_STATS_)
+                    self.__find_batsman_last_match_(99, 300, URL_BATSMAN_INNINGS_BAT_2ND_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-19).value = \
                     self.__get_bastman_dismissals_0to19_(URL_BATSMAN_DISMISSALS_BAT_2ND_STATS_)
 
             if (j == 10):
-                ws_.cell(row=j, column=ws_.max_column - 7).value = \
-                    self.__find_batsman_5_matches_avg_(URL_BATSMAN_POS_INNINGS_OVERALL_STATS_)
+                # Last 5 avg
+                ws_.cell(row=j, column=ws_.max_column - 8).value = \
+                    self.__find_batsman_5_matches_avg_(URL_BATSMAN_INNINGS_OVERALL_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-13).value = \
-                    self.__find_batsman_2nd_last_match_(0, 20, URL_BATSMAN_POS_INNINGS_OVERALL_STATS_)
+                    self.__find_batsman_2nd_last_match_(-1, 20, URL_BATSMAN_POS_INNINGS_OVERALL_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-14).value = \
-                    self.__find_batsman_last_match_(0, 20, URL_BATSMAN_POS_INNINGS_OVERALL_STATS_)
+                    self.__find_batsman_last_match_(-1, 20, URL_BATSMAN_POS_INNINGS_OVERALL_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-15).value = \
-                    self.__find_batsman_2nd_last_match_(50, 100, URL_BATSMAN_POS_INNINGS_OVERALL_STATS_)
+                    self.__find_batsman_2nd_last_match_(49, 100, URL_BATSMAN_POS_INNINGS_OVERALL_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-16).value = \
-                    self.__find_batsman_last_match_(50, 100, URL_BATSMAN_POS_INNINGS_OVERALL_STATS_)
+                    self.__find_batsman_last_match_(49, 100, URL_BATSMAN_POS_INNINGS_OVERALL_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-17).value = \
-                    self.__find_batsman_2nd_last_match_(100, 300, URL_BATSMAN_POS_INNINGS_OVERALL_STATS_)
+                    self.__find_batsman_2nd_last_match_(99, 300, URL_BATSMAN_POS_INNINGS_OVERALL_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-18).value = \
-                    self.__find_batsman_last_match_(100, 300, URL_BATSMAN_POS_INNINGS_OVERALL_STATS_)
+                    self.__find_batsman_last_match_(99, 300, URL_BATSMAN_POS_INNINGS_OVERALL_STATS_)
                 ws_.cell(row=j, column=ws_.max_column-19).value = \
                     self.__get_bastman_dismissals_0to19_(URL_BATSMAN_POS_DISMISSALS_OVERALL_STATS_)
 
@@ -372,7 +419,7 @@ class StatsFetcher:
 
         ws_['A1'].value = player_role
 
-        ws_.freeze_panes = ws_.cell(row=3, column=ws_.max_column-20)
+        ws_.freeze_panes = ws_.cell(row=3, column=ws_.max_column-23)
         self.bolding_header_font(ws_)
         self.align_center(ws_)
         # self.adjust_column_width(ws_)
@@ -400,6 +447,7 @@ class StatsFetcher:
             pos = '-'
         return pos
 
+#todo check last 3 matches batting position then determine for opener, top order batsman, middle order batsman
     def __get_recent_batting_position_df_stats_(self, df_stats, batting_position):
         df_stats = self.DFrame(df_stats)
         if (batting_position == 1):
@@ -463,7 +511,7 @@ class StatsFetcher:
                 val = str(val).split('*')[0]
                 try:
                     val = int(val)
-                    j = j + 1
+                    j = i
                     if (val > greater_than and val < less_than):
                         found_last_match = True
                         break
@@ -491,7 +539,7 @@ class StatsFetcher:
                 val = str(val).split('*')[0]
                 try:
                     val = int(val)
-                    j = j + 1
+                    j = i
                     if (val > greater_than and val < less_than):
                         last_match = last_match + 1
                         if(last_match==1):
@@ -917,7 +965,7 @@ class StatsFetcher:
                 pass
             try:
                 val = int(val)
-                j = j + 1
+                j = i
                 if (val > greater_than and val < less_than):
                     found_last_match = True
                     break
@@ -943,7 +991,7 @@ class StatsFetcher:
                 pass
             try:
                 val = int(val)
-                j = j + 1
+                j = i
                 if (val > greater_than and val < less_than):
                     last_match = last_match + 1
                     if(last_match==1):
